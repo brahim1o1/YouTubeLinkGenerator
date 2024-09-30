@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Link Redirector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        input {
+            padding: 10px;
+            margin: 10px;
+            width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #e60000;
+        }
+        .output {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>YouTube App Link Generator</h1>
+    <input type="text" id="youtubeLink" placeholder="Paste your YouTube link here" />
+    <button onclick="generateLink()">Generate Link</button>
+    <div class="output" id="output"></div>
+ 
+    <script>
+        function generateLink() {
+            const youtubeLink = document.getElementById('youtubeLink').value;
+            const videoId = youtubeLink.split('v=')[1]?.split('&')[0];
+            if (videoId) {
+                const appLink = `youtube://watch?v=${videoId}`;
+                document.getElementById('output').innerText = `Your link: ${appLink}`;
+            } else {
+                document.getElementById('output').innerText = 'Please enter a valid YouTube link.';
+            }
+        }
+    </script>
+</body>
+</html>
