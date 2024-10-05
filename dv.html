@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dv Lottery Photo Validator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #imageContainer {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin: 20px auto;
+        }
+        #uploadedImage {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        #grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .grid-line {
+            position: absolute;
+            background-color: rgba(255, 0, 0, 0.5);
+        }
+        .horizontal {
+            width: 100%;
+            height: 1px;
+        }
+        .vertical {
+            width: 1px;
+            height: 100%;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .valid {
+            color: green;
+        }
+        .invalid {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DV Lottery Photo Validator</h1>
+        <input type="file" id="imageUpload" accept="image/*">
+        <div id="imageContainer">
+            <img id="uploadedImage" src="#" alt="Uploaded image">
+            <div id="grid"></div>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const imageUpload = document.getElementById('imageUpload');
+        const uploadedImage = document.getElementById('uploadedImage');
+        const grid = document.getElementById('grid');
+        const result = document.getElementById('result');
+
+        function createGridLines() {
+            // Create horizontal lines
+            for (let i = 1; i < 3; i++) {
+                const line = document.createElement('div');
+                line.className = 'grid-line horizontal';
+                line.style.top = `${i * 33.33}%`;
+                grid.appendChild(line);
+            }
+            // Create vertical lines
+            for (let i = 1; i < 3; i++) {
+                const line = document.createElement('div');
+                line.className = 'grid-line vertical';
+                line.style.left = `${i * 33.33}%`;
+                grid.appendChild(line);
+            }
+        }
+
+        function validateImage(img) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            let topHead = canvas.height;
+            let bottomChin = 0;
+            let foundFace = false;
+
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const red = data[(y * canvas.width + x) * 4];
+                    const green = data[(y * canvas.width + x) * 4 + 1];
+                    const blue = data[(y * canvas.width + x) * 4 + 2];
+                    
+                    // Simple face detection (adjust threshold as needed)
+                    if (red > 60 && green > 40 && blue > 20 && red > blue) {
+                        topHead = Math.min(topHead, y);
+                        bottomChin = Math.max(bottomChin, y);
+                        foundFace = true;
+                    }
+                }
+            }
+
+            const headHeight = bottomChin - topHead;
+            const headRatio = headHeight / canvas.height;
+
+            let isValid = true;
+            let message = '';
+
+            if (!foundFace) {
+                isValid = false;
+                message += 'No face detected. ';
+            }
+
+            if (headRatio < 0.5 || headRatio > 0.69) {
+                isValid = false;
+                message += `Head size is ${(headRatio * 100).toFixed(1)}% of image height (should be 50-69%). `;
+            }
+
+            if (canvas.width !== 600 || canvas.height !== 600) {
+                isValid = false;
+                message += `Image dimensions are ${canvas.width}x${canvas.height}px (should be 600x600px). `;
+            }
+
+            result.className = isValid ? 'valid' : 'invalid';
+            result.textContent = isValid ? '✅ Valid' : `❌ Invalid: ${message}`;
+        }
+
+        imageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                uploadedImage.src = event.target.result;
+                uploadedImage.onload = function() {
+                    validateImage(this);
+                }
+            }
+
+            reader.readAsDataURL(file);
+        });
+
+        createGridLines();
+    </script>
+</body>
+</html>
