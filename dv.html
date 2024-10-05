@@ -3,35 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dv Lottery Photo Validator</title>
+    <title>Futuristic DV Lottery Photo Validator</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+            color: #e94560;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
         }
         .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             text-align: center;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #00fff5;
+            text-shadow: 0 0 10px rgba(0, 255, 245, 0.5);
         }
         #imageContainer {
             position: relative;
             width: 600px;
             height: 600px;
             margin: 20px auto;
+            border: 2px solid #00fff5;
+            box-shadow: 0 0 20px rgba(0, 255, 245, 0.5);
+            overflow: hidden;
         }
         #uploadedImage {
-            max-width: 100%;
-            max-height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        #grid {
+        #grid, #guidelines {
             position: absolute;
             top: 0;
             left: 0;
@@ -41,7 +59,12 @@
         }
         .grid-line {
             position: absolute;
-            background-color: rgba(255, 0, 0, 0.5);
+            background-color: rgba(233, 69, 96, 0.5);
+        }
+        .guideline {
+            position: absolute;
+            border-top: 2px dashed #00fff5;
+            width: 100%;
         }
         .horizontal {
             width: 100%;
@@ -51,58 +74,129 @@
             width: 1px;
             height: 100%;
         }
+        #ruler {
+            position: absolute;
+            left: -30px;
+            top: 0;
+            width: 30px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .ruler-mark {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: #00fff5;
+        }
+        .ruler-text {
+            position: absolute;
+            left: 2px;
+            font-size: 10px;
+            color: #00fff5;
+        }
         #result {
             margin-top: 20px;
             font-weight: bold;
+            font-size: 18px;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
         }
         .valid {
-            color: green;
+            color: #00ff00;
         }
         .invalid {
-            color: red;
+            color: #ff0000;
+        }
+        #imageUpload {
+            display: none;
+        }
+        #uploadButton {
+            background-color: #e94560;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #uploadButton:hover {
+            background-color: #00fff5;
+            color: #1a1a2e;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>DV Lottery Photo Validator</h1>
+        <h1>Futuristic DV Lottery Photo Validator</h1>
         <input type="file" id="imageUpload" accept="image/*">
+        <button id="uploadButton">Upload Photo</button>
         <div id="imageContainer">
             <img id="uploadedImage" src="#" alt="Uploaded image">
             <div id="grid"></div>
+            <div id="guidelines"></div>
+            <div id="ruler"></div>
         </div>
         <div id="result"></div>
     </div>
 
     <script>
         const imageUpload = document.getElementById('imageUpload');
+        const uploadButton = document.getElementById('uploadButton');
         const uploadedImage = document.getElementById('uploadedImage');
         const grid = document.getElementById('grid');
+        const guidelines = document.getElementById('guidelines');
+        const ruler = document.getElementById('ruler');
         const result = document.getElementById('result');
 
         function createGridLines() {
-            // Create horizontal lines
             for (let i = 1; i < 3; i++) {
-                const line = document.createElement('div');
-                line.className = 'grid-line horizontal';
-                line.style.top = `${i * 33.33}%`;
-                grid.appendChild(line);
+                const hLine = document.createElement('div');
+                hLine.className = 'grid-line horizontal';
+                hLine.style.top = `${i * 33.33}%`;
+                grid.appendChild(hLine);
+
+                const vLine = document.createElement('div');
+                vLine.className = 'grid-line vertical';
+                vLine.style.left = `${i * 33.33}%`;
+                grid.appendChild(vLine);
             }
-            // Create vertical lines
-            for (let i = 1; i < 3; i++) {
-                const line = document.createElement('div');
-                line.className = 'grid-line vertical';
-                line.style.left = `${i * 33.33}%`;
-                grid.appendChild(line);
+        }
+
+        function createGuidelines() {
+            const minHead = document.createElement('div');
+            minHead.className = 'guideline';
+            minHead.style.top = '50%';
+            guidelines.appendChild(minHead);
+
+            const maxHead = document.createElement('div');
+            maxHead.className = 'guideline';
+            maxHead.style.top = '69%';
+            guidelines.appendChild(maxHead);
+        }
+
+        function createRuler() {
+            for (let i = 0; i <= 600; i += 50) {
+                const mark = document.createElement('div');
+                mark.className = 'ruler-mark';
+                mark.style.top = `${i}px`;
+                ruler.appendChild(mark);
+
+                if (i % 100 === 0) {
+                    const text = document.createElement('div');
+                    text.className = 'ruler-text';
+                    text.style.top = `${i + 2}px`;
+                    text.textContent = i;
+                    ruler.appendChild(text);
+                }
             }
         }
 
         function validateImage(img) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0, img.width, img.height);
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
 
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
@@ -117,7 +211,6 @@
                     const green = data[(y * canvas.width + x) * 4 + 1];
                     const blue = data[(y * canvas.width + x) * 4 + 2];
                     
-                    // Simple face detection (adjust threshold as needed)
                     if (red > 60 && green > 40 && blue > 20 && red > blue) {
                         topHead = Math.min(topHead, y);
                         bottomChin = Math.max(bottomChin, y);
@@ -151,6 +244,8 @@
             result.textContent = isValid ? '✅ Valid' : `❌ Invalid: ${message}`;
         }
 
+        uploadButton.addEventListener('click', () => imageUpload.click());
+
         imageUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             const reader = new FileReader();
@@ -166,6 +261,8 @@
         });
 
         createGridLines();
+        createGuidelines();
+        createRuler();
     </script>
 </body>
 </html>
